@@ -1,22 +1,24 @@
 import { useState, useMemo } from 'react';
-import { GREEK_WORDS } from '../data/greekWords';
+import { GreekWord, GREEK_WORDS } from '../data/greekWords';
 import { Search, ArrowUpRight } from 'lucide-react';
 
 interface Props {
   onSelectWord?: (word: string) => void;
+  wordDatabase?: GreekWord[];
 }
 
 const FAMOUS_NUMBERS = [284, 312, 321, 373, 430, 461, 510, 576, 680, 681, 720, 781, 800, 888, 1219, 1310, 1480];
 
-export default function DiscoverByNumber({ onSelectWord }: Props) {
+export default function DiscoverByNumber({ onSelectWord, wordDatabase }: Props) {
+  const effectiveDatabase = wordDatabase || GREEK_WORDS;
   const [targetNumber, setTargetNumber] = useState<string>('284');
 
   const numValue = parseInt(targetNumber, 10);
 
   const exactMatches = useMemo(() => {
     if (!targetNumber || isNaN(numValue) || numValue <= 0) return [];
-    return GREEK_WORDS.filter(w => w.value === numValue);
-  }, [numValue, targetNumber]);
+    return effectiveDatabase.filter(w => w.value === numValue);
+  }, [numValue, targetNumber, effectiveDatabase]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">

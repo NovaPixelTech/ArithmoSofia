@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { GREEK_WORDS, GreekWord } from '../data/greekWords';
+import { GreekWord, GREEK_WORDS } from '../data/greekWords';
 import { calculate } from '../utils/isopsephy';
 import LetterBreakdown from './LetterBreakdown';
 import SameValueWords from './SameValueWords';
@@ -9,17 +9,19 @@ import { Dices, BookOpen } from 'lucide-react';
 
 interface Props {
   onSelectWord?: (word: string) => void;
+  wordDatabase?: GreekWord[];
 }
 
-export default function RandomDiscovery({ onSelectWord }: Props) {
+export default function RandomDiscovery({ onSelectWord, wordDatabase }: Props) {
+  const effectiveDatabase = wordDatabase || GREEK_WORDS;
   const [selectedWord, setSelectedWord] = useState<GreekWord>(() => {
     // Pick an interesting initial word with same-value counterparts
-    return GREEK_WORDS.find(w => w.word === 'ΘΕΟΣ') || GREEK_WORDS[0];
+    return effectiveDatabase.find(w => w.word === 'ΘΕΟΣ') || effectiveDatabase[0];
   });
 
   const handleCurious = () => {
-    const randomIndex = Math.floor(Math.random() * GREEK_WORDS.length);
-    setSelectedWord(GREEK_WORDS[randomIndex]);
+    const randomIndex = Math.floor(Math.random() * effectiveDatabase.length);
+    setSelectedWord(effectiveDatabase[randomIndex]);
   };
 
   const calcResult = useMemo(() => {

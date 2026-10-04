@@ -1,25 +1,37 @@
 import { useMemo } from 'react';
-import { GREEK_WORDS } from '../data/greekWords';
 import { normalizeGreek } from '../utils/isopsephy';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
+
+interface GreekWord {
+  word: string;
+  value: number;
+  transliteration?: string;
+  meaning?: string;
+  category?: string;
+  historicalSource?: string;
+  interpretationType?: 'historical' | 'modern' | 'mathematical';
+}
 
 interface Props {
   value: number;
   currentInput?: string;
   onSelectWord?: (word: string) => void;
+  wordDatabase?: GreekWord[];
 }
 
-export default function SameValueWords({ value, currentInput = '', onSelectWord }: Props) {
+export default function SameValueWords({ value, currentInput = '', onSelectWord, wordDatabase }: Props) {
   const currentNormalized = normalizeGreek(currentInput);
+
+  const effectiveDatabase = wordDatabase || [];
 
   const matches = useMemo(() => {
     if (!value || value <= 0) return [];
-    return GREEK_WORDS.filter(w => {
+    return effectiveDatabase.filter(w => {
       // Exclude exact identical word to focus on other words with same value
       const isSameWord = normalizeGreek(w.word) === currentNormalized;
       return w.value === value && !isSameWord;
     });
-  }, [value, currentNormalized]);
+  }, [value, currentNormalized, effectiveDatabase]);
 
   if (matches.length === 0) {
     return (
