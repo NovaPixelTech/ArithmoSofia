@@ -66,6 +66,22 @@ function App() {
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="flex-grow container mx-auto px-4 py-6 md:py-10 max-w-5xl pb-24 md:pb-12">
+        {/* Custom word list controls - always visible above disclaimer */}
+        <CustomWordsUpload onWordsAdded={(newWords) => {
+          setCustomWords(prev => {
+            const existingWords = new Set(prev.map(w => w.word));
+            const merged = [...prev, ...newWords].filter(w => !existingWords.has(w.word) && w.value > 0);
+            return merged as GreekWord[];
+          });
+        }} />
+
+        <ManualWordEntry onWordAdded={(word) => {
+          setCustomWords(prev => {
+            if (prev.some(w => w.word === word.word)) return prev;
+            return [...prev, word as GreekWord];
+          });
+        }} />
+
         {activeTab === 'calculator' && (
           <Calculator initialWord={selectedWord} onSelectWord={handleSelectWord} />
         )}
@@ -87,23 +103,6 @@ function App() {
       </main>
 
       <Footer />
-
-      <CustomWordsUpload onWordsAdded={(newWords) => {
-        setCustomWords(prev => {
-          // Merge: avoid duplicates by word
-          const existingWords = new Set(prev.map(w => w.word));
-          const merged = [...prev, ...newWords].filter(w => !existingWords.has(w.word) && w.value > 0);
-          return merged as GreekWord[];
-        });
-      }} />
-
-<ManualWordEntry onWordAdded={(word) => {
-        setCustomWords(prev => {
-          // Avoid duplicates
-          if (prev.some(w => w.word === word.word)) return prev;
-          return [...prev, word as GreekWord];
-        });
-      }} />
     </div>
   );
 }
