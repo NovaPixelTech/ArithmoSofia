@@ -14,6 +14,7 @@ interface Props {
   initialWord?: string;
   onSelectWord?: (word: string) => void;
   wordDatabase?: GreekWord[];
+  onDeleteWord?: (word: string) => void;
 }
 
 const EXAMPLE_WORDS = ['ΘΕΟΣ', 'ΑΓΑΠΗ', 'ΛΟΓΟΣ', 'ΣΟΦΙΑ', 'ΦΩΣ', 'ΝΟΥΣ'];
@@ -59,7 +60,7 @@ function useAnimatedCounter(targetValue: number, duration: number = 600): number
   return displayValue;
 }
 
-export default function Calculator({ initialWord = '', onSelectWord, wordDatabase }: Props) {
+export default function Calculator({ initialWord = '', onSelectWord, wordDatabase, onDeleteWord }: Props) {
   const [input, setInput] = useState(initialWord);
 
   useEffect(() => {
@@ -74,6 +75,9 @@ export default function Calculator({ initialWord = '', onSelectWord, wordDatabas
   // Check if user entered text that contains no Greek letters
   const hasInput = input.trim().length > 0;
   const hasNoGreekLetters = hasInput && result.letters.length === 0;
+  const registeredWord = input.trim() && !/\s/.test(input.trim())
+    ? wordDatabase?.find(entry => entry.word.normalize('NFC').toLocaleLowerCase() === input.trim().normalize('NFC').toLocaleLowerCase())
+    : undefined;
 
   const handleRandomWord = () => {
     const randomIndex = Math.floor(Math.random() * GREEK_WORDS.length);
@@ -182,6 +186,13 @@ export default function Calculator({ initialWord = '', onSelectWord, wordDatabas
                 Digital Root: <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{result.digitalRoot}</span>
               </div>
             </div>
+          </div>
+        )}
+        {result.total > 0 && registeredWord && onDeleteWord && (
+          <div className="flex justify-center">
+            <button type="button" onClick={() => onDeleteWord(registeredWord.word)} className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-medium">
+              Delete “{registeredWord.word}” from database
+            </button>
           </div>
         )}
       </div>

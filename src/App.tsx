@@ -12,10 +12,12 @@ import RandomDiscovery from './components/RandomDiscovery';
 import CustomWordsUpload from './components/CustomWordsUpload';
 import ManualWordEntry from './components/ManualWordEntry';
 import GreekArt from './components/GreekArt';
+import { Download } from 'lucide-react';
 
 export type Tab = 'calculator' | 'compare' | 'discover' | 'curious' | 'examples' | 'about';
 
 const STORAGE_KEY = 'isopsephy-custom-words';
+const DELETED_KEY = 'isopsephy-deleted-words';
 
 const loadCustomWordsFromStorage = (): GreekWord[] => {
   try {
@@ -41,19 +43,48 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('calculator');
   const [selectedWord, setSelectedWord] = useState<string>('ΘΕΟΣ');
   const [customWords, setCustomWords] = useState<GreekWord[]>(loadCustomWordsFromStorage);
+  const [deletedWords, setDeletedWords] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'); } catch { return []; }
+  });
+  const [wordNotice, setWordNotice] = useState('');
 
   // Merge custom words with the base dataset, avoiding duplicates
   const allWords = useMemo(() => {
     const customWordSet = new Set(customWords.map(w => w.word));
     return [
-      ...GREEK_WORDS.filter(w => !customWordSet.has(w.word)),
+      ...GREEK_WORDS.filter(w => !customWordSet.has(w.word) && !deletedWords.includes(w.word)),
       ...customWords.filter(w => w.value > 0)
     ];
-  }, [customWords]);
+  }, [customWords, deletedWords]);
 
   useEffect(() => {
     saveCustomWordsToStorage(customWords);
   }, [customWords]);
+
+  useEffect(() => {
+    try { localStorage.setItem(DELETED_KEY, JSON.stringify(deletedWords)); } catch { /* ignore storage errors */ }
+  }, [deletedWords]);
+
+  const handleDeleteWord = (word: string) => {
+    if (!window.confirm(`Delete “${word}” from the word database? This cannot be undone.`)) return;
+    setCustomWords(prev => prev.filter(entry => entry.word !== word));
+    if (GREEK_WORDS.some(entry => entry.word === word)) {
+      setDeletedWords(prev => prev.includes(word) ? prev : [...prev, word]);
+    }
+    setWordNotice(`“${word}” was deleted from the word database.`);
+  };
+
+  const handleDownloadWords = () => {
+    const csvCell = (value: string | number | undefined) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const rows = [['Word', 'Value', 'Meaning', 'Transliteration', 'Category'], ...allWords.map(w => [w.word, w.value, w.meaning, w.transliteration, w.category])];
+    const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'arithmosofia-words.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleSelectWord = (word: string) => {
     setSelectedWord(word);
@@ -72,6 +103,7 @@ function App() {
             initialWord={selectedWord}
             onSelectWord={handleSelectWord}
             wordDatabase={allWords}
+            onDeleteWord={handleDeleteWord}
           />
         )}
         {activeTab === 'compare' && (
@@ -105,6 +137,13 @@ function App() {
             <p className="text-sm text-stone-500 dark:text-stone-400">
               Upload a word list or enter a word or phrase by hand — both feed the same collection.
             </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <button type="button" onClick={handleDownloadWords} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm font-medium">
+              <Download size={16} /> Download full word list (CSV)
+            </button>
+            {wordNotice && <p role="status" className="text-sm text-green-700 dark:text-green-400">{wordNotice}</p>}
           </div>
 
           <CustomWordsUpload onWordsAdded={(newWords) => {
