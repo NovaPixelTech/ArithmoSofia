@@ -1,25 +1,23 @@
-import { useState } from 'react';
-
-interface GreekWord {
-  word: string;
-  normalized: string;
-  value: number;
-  transliteration: string;
-  meaning: string;
-  category: string;
-  interpretationType: 'historical' | 'modern' | 'mathematical';
-}
+import { useRef, useState } from 'react';
+import type { GreekWord } from '../data/greekWords';
+import { Amphora } from './GreekArt';
 
 interface CustomWordsUploadProps {
   onWordsAdded: (words: GreekWord[]) => void;
 }
 
 export default function CustomWordsUpload({ onWordsAdded }: CustomWordsUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [addedCount, setAddedCount] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null);
-    if (file) processFile();
+    const selected = e.target.files?.[0];
+    // Reset first so re-picking the same file fires change again.
+    e.target.value = '';
+    if (!selected) return;
+    setFileName(selected.name);
+    processFile(selected);
   };
 
   const parseGreekWords = (text: string): GreekWord[] => {
@@ -68,39 +66,39 @@ export default function CustomWordsUpload({ onWordsAdded }: CustomWordsUploadPro
     return total > 0 ? total : 0;
   };
 
-  const processFile = () => {
-    if (!file) return;
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const words = parseGreekWords(text);
       onWordsAdded(words);
-      setFile(null);
+      setAddedCount(words.length);
     };
     reader.readAsText(file);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-3">
       <input
+        ref={inputRef}
         type="file"
         accept=".txt,.csv"
         onChange={handleChange}
         className="hidden"
       />
       <button
-        onClick={() => {
-          const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-          if (input) input.click();
-        }}
-        className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors text-sm font-medium"
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors text-sm font-medium"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M.5 9.9a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5zm0-4.2a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm0-4.2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
-        </svg>
+        <Amphora className="w-4 h-4 text-amber-700 dark:text-amber-500" />
         Upload Greek Word List
       </button>
-      {file && <p className="text-xs text-stone-500">Selected: {file.name}</p>}
+      <p className="text-xs text-stone-500 dark:text-stone-400 text-center sm:text-left">
+        {fileName
+          ? `Selected: ${fileName}${addedCount > 0 ? ` — ${addedCount} words processed` : ''}`
+          : 'Plain text or CSV, one Greek word per line.'}
+      </p>
     </div>
   );
 }

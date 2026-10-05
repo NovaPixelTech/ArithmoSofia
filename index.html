@@ -2,8 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="theme-color" content="#1b4965" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html { scroll-behavior: smooth; }
+      body {
+        background-color: #1b4965;
+        background-image:
+          radial-gradient(circle at 50% 0%, rgba(212, 164, 55, 0.10), transparent 60%);
+      }
+      /* First-paint shimmer before React mounts */
+      #root:empty::after {
+        content: "\1F3FA\FE0E  \0391\03C1\03B9\03B8\03BC\03BF\03A3\03BF\03C6\03AF\03B1";
+        display: block;
+        padding-top: 22vh;
+        text-align: center;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 1.5rem;
+        letter-spacing: 0.35em;
+        color: #d4a437;
+      }
+      ::selection { background: #d4a437; color: #0b1f2a; }
+    </style>
     <title>Hellenic ArithmoSofia Explorer — Greek Word Numerology & Isopsephy Calculator</title>
     <meta name="description" content="Explore Greek isopsephy, calculate the numerical value of Greek words and phrases, compare words, and discover historically documented numerical relationships." />
     <meta property="og:title" content="Hellenic ArithmoSofia Explorer" />

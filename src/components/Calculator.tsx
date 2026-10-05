@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { calculate, CalculationResult } from '../utils/isopsephy';
-import { GREEK_WORDS } from '../data/greekWords';
+import { GREEK_WORDS, type GreekWord } from '../data/greekWords';
+import { AcropolisScene } from './GreekArt';
 import LetterBreakdown from './LetterBreakdown';
 import SameValueWords from './SameValueWords';
 import NumberProperties from './NumberProperties';
@@ -12,6 +13,7 @@ import { Dices, AlertCircle } from 'lucide-react';
 interface Props {
   initialWord?: string;
   onSelectWord?: (word: string) => void;
+  wordDatabase?: GreekWord[];
 }
 
 const EXAMPLE_WORDS = ['ΘΕΟΣ', 'ΑΓΑΠΗ', 'ΛΟΓΟΣ', 'ΣΟΦΙΑ', 'ΦΩΣ', 'ΝΟΥΣ'];
@@ -57,7 +59,7 @@ function useAnimatedCounter(targetValue: number, duration: number = 600): number
   return displayValue;
 }
 
-export default function Calculator({ initialWord = '', onSelectWord }: Props) {
+export default function Calculator({ initialWord = '', onSelectWord, wordDatabase }: Props) {
   const [input, setInput] = useState(initialWord);
 
   useEffect(() => {
@@ -99,6 +101,7 @@ export default function Calculator({ initialWord = '', onSelectWord }: Props) {
         <p className="text-base md:text-lg text-stone-600 dark:text-stone-300 leading-relaxed font-sans">
           Discover the numerical value and symbolic connections hidden within Greek words.
         </p>
+        <AcropolisScene className="w-full max-w-lg h-24 md:h-32 mx-auto mt-5 text-stone-500 dark:text-stone-500" />
       </div>
 
       {/* Main Calculator Box */}
@@ -192,6 +195,7 @@ export default function Calculator({ initialWord = '', onSelectWord }: Props) {
               value={result.total}
               currentInput={input}
               onSelectWord={handleSelectWord}
+              wordDatabase={wordDatabase}
             />
             <HistoricalContext />
           </div>

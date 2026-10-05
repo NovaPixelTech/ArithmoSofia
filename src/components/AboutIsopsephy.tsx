@@ -1,8 +1,15 @@
+import { GreekKeyDivider, OwlOfAthena, LaurelCrown } from './GreekArt';
+
 export default function AboutIsopsephy() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-3xl mx-auto">
       <div className="bg-white dark:bg-stone-800 p-6 md:p-10 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
-        <h2 className="text-3xl font-serif font-bold mb-6">About Greek ArithmoSofia</h2>
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <OwlOfAthena className="w-10 h-10 text-amber-700 dark:text-amber-500" />
+          <h2 className="text-3xl font-serif font-bold">About Greek ArithmoSofia</h2>
+        </div>
+        <LaurelCrown className="w-28 h-10 mx-auto text-amber-700/60 dark:text-amber-500/50 mb-6" />
+        <GreekKeyDivider />
         
         <div className="prose prose-stone dark:prose-invert max-w-none space-y-6">
           <p>

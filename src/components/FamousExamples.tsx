@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { calculate } from '../utils/isopsephy';
-import { GREEK_WORDS } from '../data/greekWords';
-import { ArrowUpRight } from 'lucide-react';
+import { GREEK_WORDS, type GreekWord } from '../data/greekWords';
+import { ArrowUpRight, RefreshCw, CheckCircle2, Loader2 } from 'lucide-react';
+import { GreekKeyDivider } from './GreekArt';
 
 interface Props {
   onSelectWord?: (word: string) => void;
+  wordDatabase?: GreekWord[];
 }
 
 interface FamousGroup {
@@ -12,6 +14,19 @@ interface FamousGroup {
   title: string;
   historicalNote: string;
   words: string[];
+}
+
+interface ScanEntry {
+  word: string;
+  value: number;
+  meaning: string;
+  transliteration: string;
+  category: string;
+}
+
+interface ScanGroup {
+  value: number;
+  entries: ScanEntry[];
 }
 
 const CURATED_FAMOUS: FamousGroup[] = [
@@ -77,7 +92,66 @@ const CURATED_FAMOUS: FamousGroup[] = [
   }
 ];
 
-export default function FamousExamples({ onSelectWord }: Props) {
+export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
+  const [scanState, setScanState] = useState<'idle' | 'running' | 'done'>('idle');
+  const [scanMatches, setScanMatches] = useState<ScanGroup[]>([]);
+  const [scanStats, setScanStats] = useState({ scanned: 0, matches: 0, values: 0 });
+
+  /**
+   * Re-processes every word currently held in the database — the bundled
+   * dataset plus anything the user has uploaded or typed in — recomputes its
+   * isopsephic value from scratch, then reports every value shared by two or
+   * more words.
+   */
+  const runDatabaseScan = () => {
+    setScanState('running');
+    setScanMatches([]);
+    setScanStats({ scanned: 0, matches: 0, values: 0 });
+
+    // Defer to the next frame so the button's pending state paints first.
+    window.setTimeout(() => {
+      const pool = (wordDatabase ?? GREEK_WORDS).filter(Boolean);
+      const byValue = new Map<number, ScanEntry[]>();
+
+      for (const entry of pool) {
+        const result = calculate(entry.word);
+        if (result.total <= 0) continue;
+        const bucket = byValue.get(result.total);
+        const record: ScanEntry = {
+          word: entry.word,
+          value: result.total,
+          meaning: entry.meaning ?? '',
+          transliteration: entry.transliteration ?? '',
+          category: entry.category ?? 'concept',
+        };
+        if (bucket) bucket.push(record);
+        else byValue.set(result.total, [record]);
+      }
+
+      const groups: ScanGroup[] = [];
+      byValue.forEach((entries, value) => {
+        if (entries.length < 2) return;
+        groups.push({
+          value,
+          entries: entries.sort((a, b) => a.word.localeCompare(b.word, 'el')),
+        });
+      });
+      groups.sort((a, b) => b.entries.length - a.entries.length || a.value - b.value);
+
+      const matchedWords = groups.reduce((sum, g) => sum + g.entries.length, 0);
+      setScanMatches(groups);
+      setScanStats({ scanned: pool.length, matches: matchedWords, values: groups.length });
+      setScanState('done');
+    }, 30);
+  };
+
+  // A fresh word upload invalidates the previous scan results.
+  useEffect(() => {
+    setScanState('idle');
+    setScanMatches([]);
+    setScanStats({ scanned: 0, matches: 0, values: 0 });
+  }, [wordDatabase]);
+
   // Verified items with details
   const verifiedGroups = useMemo(() => {
     return CURATED_FAMOUS.map(group => {
@@ -109,7 +183,101 @@ export default function FamousExamples({ onSelectWord }: Props) {
         <p className="text-sm text-stone-500 dark:text-stone-400">
           Historically recorded and celebrated numerical equivalences from ancient literature, philosophy, and early biblical scholarship.
         </p>
+
+        <div className="pt-3 flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={runDatabaseScan}
+            disabled={scanState === 'running'}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-progress text-white text-sm font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900"
+          >
+            {scanState === 'running' ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            {scanState === 'running'
+              ? 'Processing database…'
+              : scanState === 'done'
+                ? 'Rescan the Database'
+                : 'Process All Words in the Database'}
+          </button>
+          <p className="text-xs text-stone-400 dark:text-stone-500 max-w-md">
+            Recalculates every word in the current database — the{' '}
+            {(wordDatabase ?? GREEK_WORDS).length} entries you have now — and lists every value
+            shared by two or more words.
+          </p>
+        </div>
       </div>
+
+      {scanState === 'done' && (
+        <div className="rounded-3xl border border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/20 p-5 md:p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-serif font-bold text-lg text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <CheckCircle2 size={18} className="text-amber-600 dark:text-amber-400" />
+              Database Scan Complete
+            </h3>
+            <div className="flex flex-wrap gap-2 text-xs font-mono">
+              <span className="px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+                {scanStats.scanned} words processed
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+                {scanStats.values} matching values
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+                {scanStats.matches} matching words
+              </span>
+            </div>
+          </div>
+
+          {scanMatches.length === 0 ? (
+            <p className="text-sm text-stone-600 dark:text-stone-300">
+              No two words in the current database share a value. Upload or enter more Greek words and
+              scan again.
+            </p>
+          ) : (
+            <div className="space-y-4 max-h-[32rem] overflow-y-auto pr-1">
+              {scanMatches.map(group => (
+                <div
+                  key={group.value}
+                  className="rounded-2xl bg-white dark:bg-stone-900/70 border border-stone-200 dark:border-stone-700 p-4"
+                >
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <span className="font-mono text-sm font-bold text-amber-700 dark:text-amber-400">
+                      = {group.value}
+                    </span>
+                    <span className="text-[11px] uppercase tracking-wide text-stone-400 dark:text-stone-500">
+                      {group.entries.length} matches
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {group.entries.map(entry => (
+                      <button
+                        key={entry.word}
+                        type="button"
+                        onClick={() => onSelectWord && onSelectWord(entry.word)}
+                        title={entry.transliteration ? `${entry.transliteration} — ${entry.meaning}` : entry.meaning}
+                        className="px-3 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/60 dark:hover:bg-amber-950/30 transition-colors text-left focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      >
+                        <span className="font-serif font-bold text-stone-900 dark:text-stone-100">
+                          {entry.word}
+                        </span>
+                        {entry.transliteration && (
+                          <span className="ml-2 text-[11px] text-stone-500 dark:text-stone-400">
+                            {entry.transliteration}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <GreekKeyDivider />
 
       <div className="space-y-6">
         {verifiedGroups.map((group, gIdx) => (

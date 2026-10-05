@@ -1,5 +1,6 @@
 import { Tab } from '../App';
-import { Calculator, ArrowLeftRight, Search, BookOpen, Info, Dices } from 'lucide-react';
+import { Calculator, ArrowLeftRight, Search, BookOpen, Dices } from 'lucide-react';
+import { OwlOfAthena } from './GreekArt';
 
 interface Props {
   activeTab: Tab;
@@ -13,7 +14,7 @@ export default function Navigation({ activeTab, onTabChange }: Props) {
     { id: 'discover', label: 'Discover', icon: <Search size={18} /> },
     { id: 'curious', label: 'Curious', icon: <Dices size={18} /> },
     { id: 'examples', label: 'Famous Examples', icon: <BookOpen size={18} /> },
-    { id: 'about', label: 'About', icon: <Info size={18} /> },
+    { id: 'about', label: 'About', icon: <OwlOfAthena className="w-[18px] h-[18px]" /> },
   ];
 
   return (

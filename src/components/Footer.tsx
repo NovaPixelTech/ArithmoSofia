@@ -5,6 +5,9 @@ export default function Footer() {
         <p>
           Greek isopsephy is a historical system of assigning numerical values to Greek letters. Numerical equivalence between words is a mathematical observation. Symbolic or numerological interpretations are presented as interpretations, not as scientific evidence.
         </p>
+        <p className="text-xs text-stone-400 dark:text-stone-500">
+          Background music is synthesised live in the browser in the ancient Greek modes — no recordings are used.
+        </p>
         <p>&copy; {new Date().getFullYear()} Hellenic ArithmoSofia Explorer</p>
       </div>
     </footer>

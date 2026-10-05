@@ -4,7 +4,7 @@ export interface GreekWord {
   value: number;
   transliteration: string;
   meaning: string;
-  category: 'theological' | 'philosophical' | 'virtue' | 'nature' | 'cosmological' | 'concept' | 'body' | 'emotion' | 'number_word' | 'myth';
+  category: 'theological' | 'philosophical' | 'virtue' | 'nature' | 'cosmological' | 'concept' | 'body' | 'emotion' | 'number_word' | 'myth' | 'user';
   notes?: string;
   historicalSource?: string;
   interpretationType: 'historical' | 'modern' | 'mathematical';
