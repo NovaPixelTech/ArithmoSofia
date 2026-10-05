@@ -94,7 +94,7 @@ export default function Calculator({ initialWord = '', onSelectWord }: Props) {
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-3 pt-2 pb-4">
         <h1 className="text-3xl md:text-5xl font-serif font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-          Hellenic <span className="text-amber-600 dark:text-amber-400">Isopsephy</span> Explorer
+          Hellenic <span className="text-amber-600 dark:text-amber-400">ArithmoSofia</span> Explorer
         </h1>
         <p className="text-base md:text-lg text-stone-600 dark:text-stone-300 leading-relaxed font-sans">
           Discover the numerical value and symbolic connections hidden within Greek words.

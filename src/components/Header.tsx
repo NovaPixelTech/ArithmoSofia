@@ -9,10 +9,10 @@ export default function Header() {
       <div className="container mx-auto flex justify-between items-center max-w-5xl">
         <div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100">
-            Hellenic <span className="text-amber-600 dark:text-amber-400">Isopsephy</span> Explorer
+            Hellenic <span className="text-amber-600 dark:text-amber-400">ArithmoSofia</span> Explorer
           </h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 hidden md:block">
-            Greek Word Numerology & Isopsephy Calculator
+            Greek Word Numerology & ArithmoSofia Calculator
           </p>
         </div>
         <button

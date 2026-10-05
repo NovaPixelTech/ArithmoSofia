@@ -6,13 +6,13 @@ export default function ShareResult({ result }: { result: CalculationResult }) {
   const [copied, setCopied] = useState(false);
   const canShare = typeof navigator.share === 'function';
 
-  const shareText = `Hellenic Isopsephy Explorer\n\n${result.input}\n\n${result.words.flatMap(w => w.letters).map(l => `${l.letter.toUpperCase()}=${l.value}`).join(' + ')}\n\nTotal: ${result.total}\nDigital root: ${result.digitalRoot}\n\nHistorical isopsephy calculation.\nSymbolic interpretations are not scientific claims.`;
+  const shareText = `Hellenic ArithmoSofia Explorer\n\n${result.input}\n\n${result.words.flatMap(w => w.letters).map(l => `${l.letter.toUpperCase()}=${l.value}`).join(' + ')}\n\nTotal: ${result.total}\nDigital root: ${result.digitalRoot}\n\nHistorical isopsephy calculation.\nSymbolic interpretations are not scientific claims.`;
 
   const handleShare = async () => {
     if (canShare) {
       try {
         await navigator.share({
-          title: 'Isopsephy Result',
+          title: 'ArithmoSofia Result',
           text: shareText,
         });
       } catch (e) {

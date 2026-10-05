@@ -104,7 +104,7 @@ export default function FamousExamples({ onSelectWord }: Props) {
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-serif font-bold text-stone-900 dark:text-stone-100">
-          Famous Greek Isopsephy Examples
+          Famous Greek ArithmoSofia Examples
         </h2>
         <p className="text-sm text-stone-500 dark:text-stone-400">
           Historically recorded and celebrated numerical equivalences from ancient literature, philosophy, and early biblical scholarship.

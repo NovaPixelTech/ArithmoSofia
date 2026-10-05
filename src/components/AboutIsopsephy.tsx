@@ -2,11 +2,11 @@ export default function AboutIsopsephy() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-3xl mx-auto">
       <div className="bg-white dark:bg-stone-800 p-6 md:p-10 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
-        <h2 className="text-3xl font-serif font-bold mb-6">About Greek Isopsephy</h2>
+        <h2 className="text-3xl font-serif font-bold mb-6">About Greek ArithmoSofia</h2>
         
         <div className="prose prose-stone dark:prose-invert max-w-none space-y-6">
           <p>
-            <strong>Isopsephy</strong> (from Greek ἴσος <em>isos</em> meaning "equal" and ψῆφος <em>psephos</em> meaning "pebble") is the practice of adding up the number values of the letters in a word to form a single total.
+            <strong>ArithmoSofia</strong> (from Greek ἴσος <em>isos</em> meaning "equal" and ψῆφος <em>psephos</em> meaning "pebble") is the practice of adding up the number values of the letters in a word to form a single total.
           </p>
 
           <p>
