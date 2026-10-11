@@ -8,15 +8,6 @@ export interface SharedWord {
   category?: string;
 }
 
-export interface SharePayload {
-  v: 1;
-  kind: 'database' | 'match' | 'result';
-  title?: string;
-  note?: string;
-  words: SharedWord[];
-  deleted?: string[];
-}
-
 export function toSharedWords(words: Array<Partial<GreekWord> & { word: string; value: number }>): SharedWord[] {
   return words
     .filter(w => w && typeof w.word === 'string' && w.word.trim().length > 0 && w.value > 0)
@@ -29,79 +20,51 @@ export function toSharedWords(words: Array<Partial<GreekWord> & { word: string; 
     }));
 }
 
-function bytesToBase64Url(bytes: Uint8Array): string {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const escapeCsvCell = (value: string | number | undefined): string =>
+  `"${String(value ?? '').replace(/"/g, '""')}"`;
+
+export function buildWordsCsv(words: SharedWord[]): string {
+  const header = ['Word', 'Value', 'Meaning', 'Transliteration', 'Category'];
+  const rows = words.map(w => [w.word, w.value, w.meaning ?? '', w.transliteration ?? '', w.category ?? '']);
+  const csv = [header, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\r\n');
+  return '\uFEFF' + csv;
 }
 
-function base64UrlToBytes(encoded: string): Uint8Array {
-  const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = base64.length % 4 ? base64 + '='.repeat(4 - (base64.length % 4)) : base64;
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+export function downloadCsv(filename: string, csv: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
-export function encodePayload(payload: SharePayload): string {
-  const json = JSON.stringify(payload);
-  return bytesToBase64Url(new TextEncoder().encode(json));
-}
+export type CsvShareOutcome = 'shared' | 'downloaded' | 'failed';
 
-export function decodePayload(encoded: string): SharePayload | null {
+export async function shareWordsCsv(
+  filename: string,
+  words: SharedWord[],
+  title: string,
+  text: string
+): Promise<CsvShareOutcome> {
+  const csv = buildWordsCsv(words);
+  const nav = navigator as Navigator & {
+    share?: (data: ShareData) => Promise<void>;
+    canShare?: (data: ShareData) => boolean;
+  };
   try {
-    const json = new TextDecoder().decode(base64UrlToBytes(encoded));
-    const payload = JSON.parse(json) as SharePayload;
-    if (!payload || !Array.isArray(payload.words)) return null;
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
-export function buildImportUrl(payload: SharePayload): string {
-  const { origin, pathname } = window.location;
-  return `${origin}${pathname}?import=${encodePayload(payload)}`;
-}
-
-export function readImportFromLocation(): SharePayload | null {
-  try {
-    const raw = new URLSearchParams(window.location.search).get('import');
-    if (!raw) return null;
-    return decodePayload(raw);
-  } catch {
-    return null;
-  }
-}
-
-export function clearImportParam(): void {
-  try {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has('import')) return;
-    url.searchParams.delete('import');
-    const query = url.searchParams.toString();
-    window.history.replaceState({}, document.title, `${url.pathname}${query ? `?${query}` : ''}${url.hash}`);
-  } catch {
-    // ignore history errors
-  }
-}
-
-export type ShareOutcome = 'shared' | 'copied' | 'failed';
-
-export async function shareLinkOrCopy(url: string, title: string, text: string): Promise<ShareOutcome> {
-  const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
-  if (typeof nav.share === 'function') {
-    try {
-      await nav.share({ title, text, url });
+    const file = new File([csv], filename, { type: 'text/csv;charset=utf-8' });
+    if (typeof nav.share === 'function' && typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
+      await nav.share({ files: [file], title, text });
       return 'shared';
-    } catch (error) {
-      if ((error as DOMException)?.name === 'AbortError') return 'failed';
     }
+  } catch (error) {
+    if ((error as DOMException)?.name === 'AbortError') return 'failed';
   }
   try {
-    await navigator.clipboard.writeText(url);
-    return 'copied';
+    downloadCsv(filename, csv);
+    return 'downloaded';
   } catch {
     return 'failed';
   }

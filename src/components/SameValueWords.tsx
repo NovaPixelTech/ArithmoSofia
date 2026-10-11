@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { normalizeGreek } from '../utils/isopsephy';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
-import ShareLinkButton from './ShareLinkButton';
-import type { SharePayload } from '../utils/share';
+import ShareWordsButton from './ShareWordsButton';
 
 interface GreekWord {
   word: string;
@@ -35,20 +34,6 @@ export default function SameValueWords({ value, currentInput = '', onSelectWord,
     });
   }, [value, currentNormalized, effectiveDatabase]);
 
-  const matchSharePayload = (matchValue: number, matchList: typeof matches): SharePayload => ({
-    v: 1,
-    kind: 'match',
-    title: `ArithmoSofia words matching ${matchValue}`,
-    note: `Shared matching words that evaluate to ${matchValue}`,
-    words: matchList.map(item => ({
-      word: item.word,
-      value: item.value,
-      meaning: item.meaning,
-      transliteration: item.transliteration,
-      category: item.category,
-    })),
-  });
-
   if (matches.length === 0) {
     return (
       <div className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
@@ -78,8 +63,15 @@ export default function SameValueWords({ value, currentInput = '', onSelectWord,
           <span className="bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 text-xs px-2.5 py-1 rounded-full font-sans font-semibold">
             {matches.length} {matches.length === 1 ? 'word' : 'words'} ({value})
           </span>
-          <ShareLinkButton
-            payload={matchSharePayload(value, matches)}
+          <ShareWordsButton
+            words={matches.map(item => ({
+              word: item.word,
+              value: item.value,
+              meaning: item.meaning,
+              transliteration: item.transliteration,
+              category: item.category,
+            }))}
+            filename={`arithmosofia-matches-${value}.csv`}
             title={`ArithmoSofia words matching ${value}`}
           />
         </div>

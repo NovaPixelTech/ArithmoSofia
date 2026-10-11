@@ -3,8 +3,7 @@ import { calculate } from '../utils/isopsephy';
 import { GREEK_WORDS, type GreekWord } from '../data/greekWords';
 import { ArrowUpRight, RefreshCw, CheckCircle2, Loader2 } from 'lucide-react';
 import { GreekKeyDivider } from './GreekArt';
-import ShareLinkButton from './ShareLinkButton';
-import type { SharePayload, SharedWord } from '../utils/share';
+import ShareWordsButton from './ShareWordsButton';
 
 interface Props {
   onSelectWord?: (word: string) => void;
@@ -176,14 +175,6 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
     });
   }, []);
 
-  const matchPayload = (title: string, note: string, words: SharedWord[]): SharePayload => ({
-    v: 1,
-    kind: 'match',
-    title,
-    note,
-    words,
-  });
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="text-center space-y-2">
@@ -260,18 +251,15 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
                       <span className="text-[11px] uppercase tracking-wide text-stone-400 dark:text-stone-500">
                         {group.entries.length} matches
                       </span>
-                      <ShareLinkButton
-                        payload={matchPayload(
-                          `ArithmoSofia matches for ${group.value}`,
-                          `Shared matching words from the ArithmoSofia database scan — value ${group.value}`,
-                          group.entries.map(entry => ({
-                            word: entry.word,
-                            value: entry.value,
-                            meaning: entry.meaning,
-                            transliteration: entry.transliteration,
-                            category: entry.category,
-                          }))
-                        )}
+                      <ShareWordsButton
+                        words={group.entries.map(entry => ({
+                          word: entry.word,
+                          value: entry.value,
+                          meaning: entry.meaning,
+                          transliteration: entry.transliteration,
+                          category: entry.category,
+                        }))}
+                        filename={`arithmosofia-matches-${group.value}.csv`}
                         title={`ArithmoSofia matches for ${group.value}`}
                       />
                     </div>
@@ -326,17 +314,14 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
                   <span>Value:</span>
                   <span>{group.value}</span>
                 </div>
-                <ShareLinkButton
-                  payload={matchPayload(
-                    group.title,
-                    `${group.historicalNote} (Value ${group.value})`,
-                    group.wordDetails.map(w => ({
-                      word: w.word,
-                      value: w.total,
-                      meaning: w.meaning,
-                      transliteration: w.transliteration,
-                    }))
-                  )}
+                <ShareWordsButton
+                  words={group.wordDetails.map(w => ({
+                    word: w.word,
+                    value: w.total,
+                    meaning: w.meaning,
+                    transliteration: w.transliteration,
+                  }))}
+                  filename={`arithmosofia-example-${group.value}.csv`}
                   title={group.title}
                 />
               </div>
