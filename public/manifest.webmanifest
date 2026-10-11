@@ -1,7 +1,7 @@
 {
   "name": "Hellenic ArithmoSofia Explorer",
   "short_name": "ArithmoSofia",
-  "description": "Greek word numerology and isopsephy calculator.",
+  "description": "Greek word numerology and ArithmoSofia calculator.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0b1f2a",

@@ -20,7 +20,7 @@ export default function HistoricalContext() {
               Historical Context & Scholarship
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400">
-              Understanding ancient Greek isopsephy vs. modern numerology
+              Understanding ancient Greek ArithmoSofia vs. modern numerology
             </p>
           </div>
         </div>
@@ -33,10 +33,10 @@ export default function HistoricalContext() {
         <div className="mt-6 pt-6 border-t border-stone-200 dark:border-stone-800 space-y-4 text-sm text-stone-700 dark:text-stone-300 leading-relaxed animate-in fade-in duration-300">
           <div>
             <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-1">
-              What is Greek Isopsephy?
+              What is Greek ArithmoSofia?
             </h4>
             <p>
-              The word <em>isopsephy</em> comes from the Greek ἴσος (<em>isos</em>, "equal") and ψῆφος (<em>psephos</em>, "pebble" or "voting counter"). In antiquity, counting and calculating were done using pebbles on an abacus or board. Isopsephy refers to words or phrases having an equal pebble-count (numerical sum).
+              <strong>ArithmoSofia</strong> — from the Greek ἴσος (<em>isos</em>, "equal") and ψῆφος (<em>psephos</em>, "pebble" or "voting counter") — is the practice of words or phrases having an equal pebble-count (numerical sum). In antiquity, counting and calculating were done using pebbles on an abacus or board.
             </p>
           </div>
 
@@ -54,7 +54,7 @@ export default function HistoricalContext() {
               Historical Usage: Graffiti, Literature & Religion
             </h4>
             <p>
-              Isopsephy was used for playful riddles, competitive literary composition, and religious mysticism. Famous examples survive in Pompeian graffiti (e.g., <em>"I love her whose number is 545"</em>) and Roman political satire recorded by Suetonius regarding Nero. In early Christian theology, church fathers noted that <em>ΙΗΣΟΥΣ</em> (Jesus) totals 888 and evaluated symbolic connections between scriptural phrases.
+              ArithmoSofia was used for playful riddles, competitive literary composition, and religious mysticism. Famous examples survive in Pompeian graffiti (e.g., <em>"I love her whose number is 545"</em>) and Roman political satire recorded by Suetonius regarding Nero. In early Christian theology, church fathers noted that <em>ΙΗΣΟΥΣ</em> (Jesus) totals 888 and evaluated symbolic connections between scriptural phrases.
             </p>
           </div>
 

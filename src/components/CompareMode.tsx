@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { calculate } from '../utils/isopsephy';
 import { ArrowLeftRight, CheckCircle2, AlertTriangle } from 'lucide-react';
+import ShareLinkButton from './ShareLinkButton';
+import type { SharePayload } from '../utils/share';
 
 interface Props {
   onSelectWord?: (word: string) => void;
@@ -21,6 +23,17 @@ export default function CompareMode({ onSelectWord: _onSelectWord }: Props) {
   const isMatch = hasBoth && resA.total > 0 && resA.total === resB.total;
   const difference = Math.abs(resA.total - resB.total);
 
+  const compareMatchPayload = (first: string, second: string, matchValue: number): SharePayload => ({
+    v: 1,
+    kind: 'match',
+    title: `ArithmoSofia match: ${first} & ${second}`,
+    note: `Both ${first} and ${second} evaluate to ${matchValue}`,
+    words: [
+      { word: first, value: matchValue },
+      { word: second, value: matchValue },
+    ],
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="text-center space-y-2">
@@ -28,7 +41,7 @@ export default function CompareMode({ onSelectWord: _onSelectWord }: Props) {
           Compare Two Greek Words
         </h2>
         <p className="text-sm text-stone-500 dark:text-stone-400">
-          Determine if two words share an exact isopsephic equivalence or examine their numerical difference.
+          Determine if two words share an exact ArithmoSofia equivalence or examine their numerical difference.
         </p>
       </div>
 
@@ -110,11 +123,17 @@ export default function CompareMode({ onSelectWord: _onSelectWord }: Props) {
                   <span>Same Numerical Value</span>
                 </div>
                 <p className="text-sm text-green-800 dark:text-green-400">
-                  Both words evaluate to exactly <strong className="font-mono">{resA.total}</strong>. They are strictly isopsephic.
+                  Both words evaluate to exactly <strong className="font-mono">{resA.total}</strong>. They have an exact ArithmoSofia match.
                 </p>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-3 italic">
                   Note: A shared numerical value is a mathematical observation. It does not by itself establish a semantic, philosophical, or causal relationship.
                 </p>
+                <div className="mt-4 flex justify-center">
+                  <ShareLinkButton
+                    payload={compareMatchPayload(wordA, wordB, resA.total)}
+                    title={`ArithmoSofia match: ${wordA} & ${wordB}`}
+                  />
+                </div>
               </div>
             ) : (
               <div className="p-6 bg-stone-50 dark:bg-stone-900/40 border border-stone-200 dark:border-stone-700 rounded-2xl text-center animate-in fade-in duration-300">

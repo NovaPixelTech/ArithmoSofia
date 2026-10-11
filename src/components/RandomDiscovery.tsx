@@ -33,7 +33,7 @@ export default function RandomDiscovery({ onSelectWord, wordDatabase }: Props) {
       {/* Header with Call to Action */}
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-serif font-bold text-stone-900 dark:text-stone-100">
-          Random Isopsephic Exploration
+          Random ArithmoSofia Exploration
         </h2>
         <p className="text-sm text-stone-500 dark:text-stone-400 max-w-lg mx-auto">
           Explore the rich tapestry of classical Greek vocabulary, its alphabetic numerical sums, and corresponding harmonic equivalents.

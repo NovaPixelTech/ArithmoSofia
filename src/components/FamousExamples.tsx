@@ -3,6 +3,8 @@ import { calculate } from '../utils/isopsephy';
 import { GREEK_WORDS, type GreekWord } from '../data/greekWords';
 import { ArrowUpRight, RefreshCw, CheckCircle2, Loader2 } from 'lucide-react';
 import { GreekKeyDivider } from './GreekArt';
+import ShareLinkButton from './ShareLinkButton';
+import type { SharePayload, SharedWord } from '../utils/share';
 
 interface Props {
   onSelectWord?: (word: string) => void;
@@ -63,7 +65,7 @@ const CURATED_FAMOUS: FamousGroup[] = [
   {
     value: 576,
     title: 'The Heavenly Spirit & The Dove (Pneuma and Peristera)',
-    historicalNote: 'Classical early Christian isopsephic connection: the divine Spirit (Πνεῦμα, 576) shares its exact sum with the Dove (Περιστερά, 576), the form in which the Spirit descended.',
+    historicalNote: 'Classical early Christian ArithmoSofia connection: the divine Spirit (Πνεῦμα, 576) shares its exact sum with the Dove (Περιστερά, 576), the form in which the Spirit descended.',
     words: ['ΠΝΕΥΜΑ', 'ΠΕΡΙΣΤΕΡΑ', 'ΑΕΤΟΣ', 'ΠΟΙΗΤΗΣ']
   },
   {
@@ -174,6 +176,14 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
     });
   }, []);
 
+  const matchPayload = (title: string, note: string, words: SharedWord[]): SharePayload => ({
+    v: 1,
+    kind: 'match',
+    title,
+    note,
+    words,
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="text-center space-y-2">
@@ -246,9 +256,25 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
                     <span className="font-mono text-sm font-bold text-amber-700 dark:text-amber-400">
                       = {group.value}
                     </span>
-                    <span className="text-[11px] uppercase tracking-wide text-stone-400 dark:text-stone-500">
-                      {group.entries.length} matches
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] uppercase tracking-wide text-stone-400 dark:text-stone-500">
+                        {group.entries.length} matches
+                      </span>
+                      <ShareLinkButton
+                        payload={matchPayload(
+                          `ArithmoSofia matches for ${group.value}`,
+                          `Shared matching words from the ArithmoSofia database scan — value ${group.value}`,
+                          group.entries.map(entry => ({
+                            word: entry.word,
+                            value: entry.value,
+                            meaning: entry.meaning,
+                            transliteration: entry.transliteration,
+                            category: entry.category,
+                          }))
+                        )}
+                        title={`ArithmoSofia matches for ${group.value}`}
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {group.entries.map(entry => (
@@ -295,9 +321,24 @@ export default function FamousExamples({ onSelectWord, wordDatabase }: Props) {
                   {group.historicalNote}
                 </p>
               </div>
-              <div className="flex items-center space-x-1.5 self-start sm:self-auto font-mono text-lg font-bold px-3 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900 rounded-xl">
-                <span>Value:</span>
-                <span>{group.value}</span>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <div className="flex items-center space-x-1.5 font-mono text-lg font-bold px-3 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900 rounded-xl">
+                  <span>Value:</span>
+                  <span>{group.value}</span>
+                </div>
+                <ShareLinkButton
+                  payload={matchPayload(
+                    group.title,
+                    `${group.historicalNote} (Value ${group.value})`,
+                    group.wordDetails.map(w => ({
+                      word: w.word,
+                      value: w.total,
+                      meaning: w.meaning,
+                      transliteration: w.transliteration,
+                    }))
+                  )}
+                  title={group.title}
+                />
               </div>
             </div>
 

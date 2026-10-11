@@ -52,7 +52,7 @@ export default function DiscoverByNumber({ onSelectWord, wordDatabase }: Props) 
         {/* Famous Number Shortcut Pills */}
         <div className="space-y-2 pt-1">
           <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-            Explore frequent isopsephic values:
+            Explore frequent ArithmoSofia values:
           </span>
           <div className="flex flex-wrap gap-1.5">
             {FAMOUS_NUMBERS.map(n => (

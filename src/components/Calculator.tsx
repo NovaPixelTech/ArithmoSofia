@@ -134,7 +134,7 @@ export default function Calculator({ initialWord = '', onSelectWord, wordDatabas
           <div className="p-4 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center space-x-3 text-amber-900 dark:text-amber-300 animate-in fade-in duration-200 text-sm">
             <AlertCircle size={20} className="shrink-0 text-amber-600 dark:text-amber-400" />
             <span>
-              <strong>Please enter at least one Greek letter.</strong> English letters, numerals, and punctuation do not have values in Greek isopsephy.
+              <strong>Please enter at least one Greek letter.</strong> English letters, numerals, and punctuation do not have values in Greek ArithmoSofia.
             </span>
           </div>
         )}
@@ -174,7 +174,7 @@ export default function Calculator({ initialWord = '', onSelectWord, wordDatabas
           <div className="mt-8 pt-8 border-t border-stone-100 dark:border-stone-700/80 text-center animate-in slide-in-from-bottom-4 duration-500">
             <div className="inline-flex flex-col items-center">
               <span className="text-xs uppercase tracking-widest text-stone-400 dark:text-stone-500 font-semibold mb-1">
-                Total Isopsephic Value
+                Total ArithmoSofia Value
               </span>
               <div
                 className="text-7xl sm:text-8xl md:text-9xl font-extrabold text-amber-600 dark:text-amber-400 tabular-nums tracking-tight font-serif select-all"

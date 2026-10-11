@@ -12,7 +12,10 @@ import RandomDiscovery from './components/RandomDiscovery';
 import CustomWordsUpload from './components/CustomWordsUpload';
 import ManualWordEntry from './components/ManualWordEntry';
 import GreekArt from './components/GreekArt';
-import { Download } from 'lucide-react';
+import ShareLinkButton from './components/ShareLinkButton';
+import { Download, Trash2, X } from 'lucide-react';
+import { toSharedWords, readImportFromLocation, clearImportParam } from './utils/share';
+import type { SharePayload } from './utils/share';
 
 export type Tab = 'calculator' | 'compare' | 'discover' | 'curious' | 'examples' | 'about';
 
@@ -39,6 +42,9 @@ const saveCustomWordsToStorage = (words: GreekWord[]) => {
   }
 };
 
+const normalizeWord = (text: string): string =>
+  text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('calculator');
   const [selectedWord, setSelectedWord] = useState<string>('ΘΕΟΣ');
@@ -47,6 +53,7 @@ function App() {
     try { return JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'); } catch { return []; }
   });
   const [wordNotice, setWordNotice] = useState('');
+  const [importNotice, setImportNotice] = useState('');
 
   // Merge custom words with the base dataset, avoiding duplicates
   const allWords = useMemo(() => {
@@ -65,6 +72,54 @@ function App() {
     try { localStorage.setItem(DELETED_KEY, JSON.stringify(deletedWords)); } catch { /* ignore storage errors */ }
   }, [deletedWords]);
 
+  // Apply a word database shared through a link (?import=...)
+  useEffect(() => {
+    const payload = readImportFromLocation();
+    if (!payload) return;
+    clearImportParam();
+
+    const existing = new Set(loadCustomWordsFromStorage().map(w => w.word));
+    const newWords: GreekWord[] = [];
+    for (const w of payload.words ?? []) {
+      if (!w || typeof w.word !== 'string' || !(w.value > 0)) continue;
+      if (existing.has(w.word)) continue;
+      existing.add(w.word);
+      newWords.push({
+        word: w.word,
+        normalized: normalizeWord(w.word),
+        value: w.value,
+        transliteration: w.transliteration || w.word,
+        meaning: w.meaning || 'Imported from a shared link',
+        category: 'user',
+        interpretationType: 'mathematical',
+      });
+    }
+
+    if (newWords.length > 0) {
+      setCustomWords(prev => {
+        const seen = new Set(prev.map(w => w.word));
+        return [...prev, ...newWords.filter(w => !seen.has(w.word))];
+      });
+    }
+
+    setDeletedWords(prev => {
+      const restored = new Set(newWords.map(w => w.word));
+      const next = prev.filter(w => !restored.has(w));
+      if (payload.deleted && payload.deleted.length > 0) {
+        const set = new Set(next);
+        payload.deleted.forEach(word => set.add(word));
+        return Array.from(set);
+      }
+      return next;
+    });
+
+    setImportNotice(
+      newWords.length > 0
+        ? `Imported ${newWords.length} word${newWords.length === 1 ? '' : 's'} into your database from a shared link.`
+        : 'A shared word link was opened — every word in it was already in your database.'
+    );
+  }, []);
+
   const handleDeleteWord = (word: string) => {
     if (!window.confirm(`Delete “${word}” from the word database? This cannot be undone.`)) return;
     setCustomWords(prev => prev.filter(entry => entry.word !== word));
@@ -72,6 +127,13 @@ function App() {
       setDeletedWords(prev => prev.includes(word) ? prev : [...prev, word]);
     }
     setWordNotice(`“${word}” was deleted from the word database.`);
+  };
+
+  const handleDeleteDatabase = () => {
+    if (!window.confirm('Delete the ENTIRE word database? This removes every word — the built-in list and everything you added — and cannot be undone.')) return;
+    setCustomWords([]);
+    setDeletedWords(GREEK_WORDS.map(entry => entry.word));
+    setWordNotice('The entire word database was deleted.');
   };
 
   const handleDownloadWords = () => {
@@ -86,6 +148,15 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const databaseSharePayload: SharePayload = {
+    v: 1,
+    kind: 'database',
+    title: 'ArithmoSofia word database',
+    note: 'Words added or customised in ArithmoSofia',
+    words: toSharedWords(customWords),
+    deleted: deletedWords,
+  };
+
   const handleSelectWord = (word: string) => {
     setSelectedWord(word);
     setActiveTab('calculator');
@@ -98,6 +169,23 @@ function App() {
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="flex-grow container mx-auto px-4 py-6 md:py-10 max-w-5xl pb-24 md:pb-12">
+        {importNotice && (
+          <div
+            role="status"
+            className="mb-6 flex items-start justify-between gap-3 rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 animate-in fade-in duration-300"
+          >
+            <span>{importNotice}</span>
+            <button
+              type="button"
+              onClick={() => setImportNotice('')}
+              className="shrink-0 rounded-full p-1 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+              aria-label="Dismiss import message"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         {activeTab === 'calculator' && (
           <Calculator
             initialWord={selectedWord}
@@ -139,10 +227,25 @@ function App() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <button type="button" onClick={handleDownloadWords} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm font-medium">
-              <Download size={16} /> Download full word list (CSV)
-            </button>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button type="button" onClick={handleDownloadWords} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm font-medium">
+                <Download size={16} /> Download full word list (CSV)
+              </button>
+              <ShareLinkButton
+                payload={databaseSharePayload}
+                title="ArithmoSofia word database"
+                label="Share word database"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-sm font-medium transition-colors"
+              />
+              <button type="button" onClick={handleDeleteDatabase} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-medium">
+                <Trash2 size={16} /> Delete entire database
+              </button>
+            </div>
+            <p className="text-xs text-stone-400 dark:text-stone-500 max-w-xl text-center">
+              Sharing sends a link that adds your custom words (and word removals) to the recipient&apos;s
+              ArithmoSofia database when they open it.
+            </p>
             {wordNotice && <p role="status" className="text-sm text-green-700 dark:text-green-400">{wordNotice}</p>}
           </div>
 

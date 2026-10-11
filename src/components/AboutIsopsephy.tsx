@@ -32,13 +32,13 @@ export default function AboutIsopsephy() {
 
           <h3 className="text-xl font-serif font-bold pt-4">Historical Use</h3>
           <p>
-            Isopsephy was used for scholarly, mystical, and recreational purposes. If two words had the same numerical value, they were considered to be connected in some meaningful way. This practice was widespread in the Hellenistic world, particularly in Alexandria, and heavily influenced early Christian literature and Jewish Gematria.
+            ArithmoSofia was used for scholarly, mystical, and recreational purposes. If two words had the same numerical value, they were considered to be connected in some meaningful way. This practice was widespread in the Hellenistic world, particularly in Alexandria, and heavily influenced early Christian literature and Jewish Gematria.
           </p>
 
           <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl mt-8 italic">
             <strong>Modern symbolic interpretation — not scientific evidence.</strong>
             <p className="mt-2 text-sm text-amber-900 dark:text-amber-200">
-              This tool presents isopsephy as a historical and mathematical study. The numerical equivalence between words is a mathematical fact based on the historical system, but any symbolic or numerological meaning derived from these equivalences is a matter of interpretation and belief, not science.
+              This tool presents ArithmoSofia as a historical and mathematical study. The numerical equivalence between words is a mathematical fact based on the historical system, but any symbolic or numerological meaning derived from these equivalences is a matter of interpretation and belief, not science.
             </p>
           </div>
         </div>
