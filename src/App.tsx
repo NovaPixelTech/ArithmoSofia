@@ -1,11 +1,12 @@
 import { GreekWord, GREEK_WORDS } from './data/greekWords';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Navigation from './components/Navigation';
 import Calculator from './components/Calculator';
 import CompareMode from './components/CompareMode';
 import DiscoverByNumber from './components/DiscoverByNumber';
+import MatchingWords from './components/MatchingWords';
 import FamousExamples from './components/FamousExamples';
 import AboutIsopsephy from './components/AboutIsopsephy';
 import RandomDiscovery from './components/RandomDiscovery';
@@ -15,8 +16,9 @@ import GreekArt from './components/GreekArt';
 import ShareWordsButton from './components/ShareWordsButton';
 import { Download, Trash2 } from 'lucide-react';
 import { toSharedWords, buildWordsCsv, downloadCsv } from './utils/share';
+import { parseWordsFromCsvText } from './utils/csvImport';
 
-export type Tab = 'calculator' | 'compare' | 'discover' | 'curious' | 'examples' | 'about';
+export type Tab = 'calculator' | 'compare' | 'discover' | 'curious' | 'matches' | 'examples' | 'about';
 
 const STORAGE_KEY = 'isopsephy-custom-words';
 const DELETED_KEY = 'isopsephy-deleted-words';
@@ -110,6 +112,39 @@ function App() {
     );
   };
 
+  // Keep a live reference so the OS file-launch handler always uses current state.
+  const handleWordsAddedRef = useRef(handleWordsAdded);
+  useEffect(() => {
+    handleWordsAddedRef.current = handleWordsAdded;
+  });
+
+  // PWA File Handling API: when the installed app is opened with a shared CSV
+  // file, read it and import immediately.
+  useEffect(() => {
+    type LaunchFile = { getFile: () => Promise<File> };
+    type LaunchParams = { files?: LaunchFile[] };
+    const queue = (window as unknown as { launchQueue?: { setConsumer: (cb: (params: LaunchParams) => void) => void } }).launchQueue;
+    if (!queue || typeof queue.setConsumer !== 'function') return;
+
+    queue.setConsumer(async (params) => {
+      const handles = params?.files ?? [];
+      const collected: GreekWord[] = [];
+      for (const handle of handles) {
+        try {
+          const file = await handle.getFile();
+          const text = await file.text();
+          collected.push(...parseWordsFromCsvText(text));
+        } catch {
+          // ignore unreadable launches
+        }
+      }
+      if (collected.length > 0) {
+        setActiveTab('matches');
+        handleWordsAddedRef.current(collected);
+      }
+    });
+  }, []);
+
   const handleSelectWord = (word: string) => {
     setSelectedWord(word);
     setActiveTab('calculator');
@@ -138,6 +173,9 @@ function App() {
         )}
         {activeTab === 'curious' && (
           <RandomDiscovery onSelectWord={handleSelectWord} wordDatabase={allWords} />
+        )}
+        {activeTab === 'matches' && (
+          <MatchingWords onSelectWord={handleSelectWord} wordDatabase={allWords} />
         )}
         {activeTab === 'examples' && (
           <FamousExamples onSelectWord={handleSelectWord} wordDatabase={allWords} />

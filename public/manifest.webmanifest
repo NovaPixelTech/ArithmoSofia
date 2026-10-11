@@ -3,9 +3,19 @@
   "short_name": "ArithmoSofia",
   "description": "Greek word numerology and ArithmoSofia calculator.",
   "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#0b1f2a",
   "theme_color": "#1b4965",
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "text/csv": [".csv"],
+        "text/plain": [".txt"]
+      }
+    }
+  ],
   "icons": [
     {
       "src": "./icon.svg",
