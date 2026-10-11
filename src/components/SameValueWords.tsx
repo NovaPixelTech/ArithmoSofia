@@ -46,6 +46,16 @@ export default function SameValueWords({ value, currentInput = '', onSelectWord,
         <p className="text-sm text-stone-500 dark:text-stone-400">
           No other verified words in our dataset currently share the exact value of <strong className="font-mono text-stone-700 dark:text-stone-300">{value}</strong>.
         </p>
+        {currentInput.trim().length > 0 && value > 0 && (
+          <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-700 flex justify-center">
+            <ShareWordsButton
+              words={[{ word: currentInput.trim(), value }]}
+              filename={`arithmosofia-word-${value}.csv`}
+              title={`ArithmoSofia: ${currentInput.trim()} = ${value}`}
+              label="Share this word (CSV)"
+            />
+          </div>
+        )}
       </div>
     );
   }
